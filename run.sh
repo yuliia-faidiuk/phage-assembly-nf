@@ -23,6 +23,8 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+VERSION=$(grep -m1 "version *=" "$HERE/nextflow.config" | sed -E "s/.*'([^']+)'.*/\\1/")
+echo "phage-assembly-nf v$VERSION  ($HERE)   update with:  git -C $HERE pull"
 echo "== 1/4  pre-flight check"
 bash "$HERE/bin/doctor.sh" "${INPUT:-$HERE}" || exit 1
 

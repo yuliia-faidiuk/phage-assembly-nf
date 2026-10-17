@@ -4,6 +4,10 @@ Versions follow [semantic versioning](https://semver.org): MAJOR.MINOR.PATCH.
 MAJOR = outputs or parameters change in a way that breaks existing use; MINOR = new feature, old runs still work;
 PATCH = bug fix only. Run a specific version with `nextflow run yuliia-faidiuk/phage-assembly-nf -r v1.1.0`.
 
+## [1.1.1] - 2026-10-18
+### Changed
+- The version is printed at the start of every run (wrapper and Nextflow log); README explains how to update.
+
 ## [1.1.0] - 2026-10-18
 ### Added
 - `07_mapping/<sample>.alignment_report.html`: self-contained read-pileup viewer (igv-reports) at every mixed

@@ -38,6 +38,7 @@ def parseReadName(String fname) {
 
 workflow {
     main:
+    log.info "phage-assembly-nf v${workflow.manifest.version}  (${workflow.repository ? workflow.repository + ' @ ' + workflow.revision : 'local copy in ' + workflow.projectDir})"
     if (params.help) { helpMessage(); exit 0 }
     if (!params.input && !params.samplesheet) { helpMessage(); error "Give --input <folder> or --samplesheet <csv>" }
 

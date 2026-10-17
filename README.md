@@ -65,6 +65,15 @@ bash phage-assembly-nf/run.sh --test                              # two small pu
 If something fails, fix the cause and run **the same command again**: finished steps are
 reused, only the failed step and the ones after it are rerun.
 
+Every run prints its version first (`phage-assembly-nf v1.1.1`). To update to the newest version:
+
+```bash
+git -C phage-assembly-nf pull
+```
+
+(`nextflow pull yuliia-faidiuk/phage-assembly-nf` if you run it straight from GitHub.) Changes per version
+are listed in `CHANGELOG.md`.
+
 ## 3. What you get
 
 `results/summary.md` is the first thing to open: one table, one column per phage, with every
