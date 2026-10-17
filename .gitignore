@@ -1,0 +1,11 @@
+# Nextflow run artefacts
+work/
+.nextflow/
+.nextflow.log*
+results*/
+**/pipeline_info/
+# test reads are downloaded, never committed
+test_data/*.fastq.gz
+test_data/*.part
+test_data/results*/
+__pycache__/
