@@ -69,6 +69,7 @@ and `trace.txt` lists each task's status and work dir in one table.
 | SPADES | `Error == 0 ... out of memory` | memory | as above (exit 137) |
 | BANDAGE_IMAGE | `could not connect to display` / `qt.qpa.plugin` | missing offscreen platform | already set (`QT_QPA_PLATFORM=offscreen`); if it still fails, the graph is in `05_assembly/*/assembly.gfa`, open it in Bandage on your PC |
 | MAP_READS | `[E::bwa_idx_load]` / `fail to locate the index` | the index step failed (disk full?) | check disk, rerun |
+| IGV_REPORT | `create_report` error | very deep BAM or odd contig names | the BAM and session file are still there; open them in IGV desktop as described in `07_mapping/HOW_TO_VIEW_ALIGNMENTS.txt` |
 | VARIANTS | empty table | no disagreement between reads and contig: that is good | nothing |
 | PILON | `java.lang.OutOfMemoryError` | memory | run with `--max_memory` higher if your machine has it; or skip Pilon by using the unpolished `07_mapping/*.fasta` |
 | PHAGETERM | marked FAILED but the pipeline continued | PhageTerm is optional; typical causes: reference with >1 contig that confuses it, very few reads mapping, or the local image missing | read `09_phageterm/phageterm.log`; run it by hand on the longest contig only; `docker build -t phage-pipeline/phagetermvirome:4.3 phage-assembly-nf/containers/phageterm` if the image is missing |

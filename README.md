@@ -82,7 +82,7 @@ Per sample, the folders follow the homework steps:
 | `04_subsampling/` | subsample | `*.subsample_info.tsv` (genome size used, coverage before/after); `quick_assembly/` if the size was estimated |
 | `05_assembly/` | assemble | `unicycler_normal/`, `unicycler_conservative/`, `unicycler_bold/`, `spades/` each with `assembly.fasta`, `assembly.gfa`, the log, `coverage_used.txt`; `*.contigs.tsv` tables |
 | `06_bandage/` | Bandage | `*.png` one picture per assembly, `*.graph_info.tsv` |
-| `07_mapping/` | map reads, IGV | `*.bam` + `*.fasta`; **double-click `*.igv_session.xml` in IGV**; `*.coverage.txt`, `*.flagstat.txt`; `*.termini_peaks.tsv` (strongest read-start pile-up per strand: where the physical genome ends are, if the library shows them) |
+| `07_mapping/` | map reads, IGV | **`*.alignment_report.html`: open in a browser to see the read pileups** at every mixed position, the termini peaks and the contig ends (no IGV needed); `HOW_TO_VIEW_ALIGNMENTS.txt` explains the IGV desktop route with `*.fasta` + `*.bam` (or `*.igv_session.xml`); `*.coverage.txt`, `*.flagstat.txt`; `*.termini_peaks.tsv` (strongest read-start pile-up per strand) |
 | `08_variants/` | mixed positions | `*.mixed_positions.tsv` (position, bases, depth, fraction of reads with the other base); `pilon/*.pilon.changes` |
 | `09_phageterm/` | PhageTerm | `*_PhageTerm_report.pdf`, `phageterm.log`. Trust the class only when `termini_signal` in `summary.md` says *present*: PhageTerm needs libraries whose adapters were ligated to the fragment ends (TruSeq-type). Tagmentation (Nextera) libraries show no read-start peak at the termini and PhageTerm then guesses. |
 | `10_final/` | finishing | `*.before_rotation.fasta`, `*.after_rotation.fasta`, `rotation_method.txt` |
@@ -140,11 +140,13 @@ main.nf                    the workflow: sample detection + the order of steps
 nextflow.config            parameters, container versions, CPU/memory, profiles (test, quick)
 modules/reads.nf           lane merge, FastQC, fastp, host removal, read cap, quick assembly, subsample
 modules/assembly.nf        Unicycler (3 modes, with 100x fallback), SPAdes, Bandage image, contig table
-modules/finishing.nf       bwa mapping + IGV session, bcftools, Pilon, PhageTerm, dnaapler rotation
+modules/finishing.nf       bwa mapping + IGV session, alignment report (igv.js), bcftools, Pilon, PhageTerm, dnaapler rotation
 modules/report.nf          MultiQC, summary table
 bin/doctor.sh              pre-flight check of Docker / Java / Nextflow / memory / disk
 bin/detect_samples.py      finds R1/R2 pairs and lanes in a folder, writes the samplesheet
 bin/summarize.py           merges the per-step numbers into summary.tsv / summary.md
+bin/make_igv_sites.py      chooses the positions shown in the alignment report
+bin/termini_peaks.sh       strongest read-start pile-up per strand (termini signal)
 containers/phageterm/      Dockerfile for PhageTermVirome 4.3
 test_data/get_test_data.sh downloads the two public test phages (T7, phiEc_1)
 TROUBLESHOOTING.md         what to do when it stops

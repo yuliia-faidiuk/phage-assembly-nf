@@ -3,7 +3,7 @@ nextflow.enable.dsl = 2
 
 include { PREPARE_READS; FASTQC as FASTQC_RAW; FASTQC as FASTQC_TRIMMED; FASTP; HOST_REMOVE; CAP_READS; QUICK_ASSEMBLY; SUBSAMPLE } from './modules/reads.nf'
 include { UNICYCLER; SPADES; BANDAGE_IMAGE; CONTIG_TABLE } from './modules/assembly.nf'
-include { MAP_READS; VARIANTS; PILON; PHAGETERM; ROTATE } from './modules/finishing.nf'
+include { MAP_READS; VARIANTS; PILON; PHAGETERM; ROTATE; IGV_REPORT } from './modules/finishing.nf'
 include { MULTIQC; SUMMARY } from './modules/report.nf'
 
 def helpMessage() {
@@ -119,6 +119,7 @@ workflow {
     MAP_READS(ch_clean.join(ch_primary))
     VARIANTS(MAP_READS.out.bam)
     PILON(MAP_READS.out.bam)
+    IGV_REPORT(MAP_READS.out.bam.join(MAP_READS.out.termini).join(VARIANTS.out.vcf))
 
     ch_pt_summary = Channel.empty()
     if (!params.skip_phageterm) {

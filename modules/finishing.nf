@@ -68,8 +68,7 @@ process VARIANTS {
     tuple val(meta), path(ref), path(fai), path(bam), path(bai)
 
     output:
-    path "${meta.id}.calls.vcf.gz"
-    path "${meta.id}.calls.vcf.gz.csi"
+    tuple val(meta), path("${meta.id}.calls.vcf.gz"), path("${meta.id}.calls.vcf.gz.csi"), emit: vcf
     path "${meta.id}.mixed_positions.tsv"
     path "${meta.id}.08_variants.summary.tsv", emit: summary
 
@@ -223,5 +222,51 @@ process ROTATE {
     n=\$(grep -c '>' ${meta.id}.after_rotation.fasta)
     len=\$(grep -v '>' ${meta.id}.after_rotation.fasta | tr -d '\\n' | wc -c)
     printf 'final_contigs\\t%s\\nfinal_total_bp\\t%s\\nrotation\\t%s\\n' "\$n" "\$len" "\$(cut -d: -f1 rotation_method.txt)" > ${meta.id}.10_final.summary.tsv
+    """
+}
+
+process IGV_REPORT {
+    // Self-contained HTML with the read pileups (igv.js) at every mixed position, the termini peaks,
+    // contig ends and a few windows; opens in any browser without IGV, internet or a server.
+    tag "$meta.id"
+    label 'process_low'
+    container params.containers.igvreports
+    publishDir path: { "${params.outdir}/${meta.id}/07_mapping" }, mode: 'copy'
+
+    input:
+    tuple val(meta), path(ref), path(fai), path(bam), path(bai), path(termini), path(vcf), path(csi)
+
+    output:
+    path "${meta.id}.alignment_report.html"
+    path "HOW_TO_VIEW_ALIGNMENTS.txt"
+
+    script:
+    """
+    set -euo pipefail
+    export HOME=\$PWD
+    make_igv_sites.py --fai $fai --termini $termini --vcf $vcf --min-contig ${params.min_phage_contig} --out sites.bed
+    create_report sites.bed --fasta $ref --tracks $bam $vcf --flanking 400 --standalone \\
+        --title "${meta.id}: reads mapped to the assembly" --output ${meta.id}.alignment_report.html > create_report.log 2>&1
+    cat > HOW_TO_VIEW_ALIGNMENTS.txt <<TXT
+How to look at the reads mapped to the assembly (homework steps 7 and 8)
+
+A. Quick look, no installation
+   Open ${meta.id}.alignment_report.html in any browser. The table lists the positions worth looking at
+   (every position where reads disagree with the contig, the termini peaks, the contig ends and three
+   windows); click a row to see the read pileup around it. Each row shows 400 bp on each side.
+
+B. Whole genome, interactive: IGV desktop (https://igv.org/doc/desktop/#DownloadPage)
+   On WSL, first copy this whole 07_mapping folder to a Windows folder (e.g. explorer.exe . ), then in IGV:
+   1. Genomes > Load Genome from File...   -> ${meta.id}.fasta
+   2. File > Load from File...             -> ${meta.id}.bam      (the .bam.bai index must sit next to it)
+   3. Type a position in the box at the top (e.g. 1:12000-12500) or zoom with + / -.
+   Or in one go: File > Open Session...    -> ${meta.id}.igv_session.xml   (works when the files stayed together)
+   Right-click the read track > "Collapsed" to see depth, > "Color alignments by > read strand" for termini,
+   > "Sort alignments by > base" at a mixed position.
+
+Files: ${meta.id}.fasta (contigs the reads were mapped to), ${meta.id}.bam/.bai (the alignments),
+       ${meta.id}.coverage.txt (depth per contig), ${meta.id}.termini_peaks.tsv (read-start pile-ups),
+       ../08_variants/${meta.id}.mixed_positions.tsv (the positions listed in the report).
+TXT
     """
 }
